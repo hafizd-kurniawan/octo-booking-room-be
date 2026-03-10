@@ -1,4 +1,9 @@
 # octo-booking-room-be
+## Running Project 
+```bash
+./mvnw spring-boot:run # linux
+./mvn spring-boot:run  # NT 
+```
 ## Semantic Commit Messages
 ```txt
 feat: (new feature for the user, not a new feature for build script)
