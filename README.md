@@ -1,7 +1,17 @@
 # octo-booking-room-be
+## Semantic Commit Messages
 ```txt
-## Struktur Folder Project
+feat: (new feature for the user, not a new feature for build script)
+fix: (bug fix for the user, not a fix to a build script)
+docs: (changes to the documentation)
+style: (formatting, missing semi colons, etc; no production code change)
+refactor: (refactoring production code, eg. renaming a variable)
+test: (adding missing tests, refactoring tests; no production code change)
+chore: (updating grunt tasks etc; no production code change)
+```
 
+## Struktur Folder Project
+```txt
 src/main/java/com/octo/booking_room
 
 ├── BookingRoomApplication.java
@@ -50,8 +60,8 @@ src/main/java/com/octo/booking_room
 
 ```
 
-```txt
 ## Flow Arsitektur Project
+```txt
 Controller
    ↓
 Service
