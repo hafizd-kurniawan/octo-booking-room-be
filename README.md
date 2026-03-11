@@ -2,7 +2,12 @@
 ## Running Project 
 ```bash
 ./mvnw spring-boot:run # linux
-./mvn spring-boot:run  # NT 
+./mvn spring-boot:run  # NT
+
+docker compose down
+docker compose up --build
+docker compose logs -f backend
+docker exec -it booking_mysql mysql -u root -p
 ```
 ## Semantic Commit Messages
 ```txt
