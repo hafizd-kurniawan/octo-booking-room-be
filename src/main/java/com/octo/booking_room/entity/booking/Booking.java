@@ -1,9 +1,18 @@
-package com.octo.booking_room.entity;
+package com.octo.booking_room.entity.booking;
+
+import com.octo.booking_room.entity.customer.Customer;
+import com.octo.booking_room.entity.room.Room;
 
 import jakarta.persistence.*;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 import java.time.LocalDate;
 import java.util.List;
 
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name = "booking")
 public class Booking {
@@ -29,3 +38,4 @@ public class Booking {
   private List<BookingSlot> bookingSlots;
 
 }
+

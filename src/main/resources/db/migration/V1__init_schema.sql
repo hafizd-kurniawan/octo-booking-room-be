@@ -4,11 +4,12 @@ CREATE TABLE IF NOT EXISTS customer (
   phone VARCHAR(20) NOT NULL,
   email VARCHAR(255) NOT NULL UNIQUE,
   password VARCHAR(255) NOT NULL,
-  is_admin BOOLEAN NOT NULL DEFAULT FALSE
+  is_admin CHAR(1) NOT NULL DEFAULT 'N'
 );
 
 CREATE TABLE IF NOT EXISTS room_type (
   type_id VARCHAR(255) PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
   capacity INT NOT NULL
 );
 
@@ -22,15 +23,18 @@ CREATE TABLE IF NOT EXISTS room (
 
 CREATE TABLE IF NOT EXISTS booking (
   booking_id VARCHAR(255) PRIMARY KEY,
-  status ENUM('pending','confirmed','canceled') NOT NULL DEFAULT 'pending',
+  status VARCHAR(255) NOT NULL DEFAULT 'PENDING',
+  date DATE NOT NULL,
   customer_id VARCHAR(255) NOT NULL,
-  FOREIGN KEY (customer_id) REFERENCES customer(customer_id)
+  room_id VARCHAR(255) NOT NULL,
+  FOREIGN KEY (customer_id) REFERENCES customer(customer_id),
+  FOREIGN KEY (room_id) REFERENCES room(room_id)
 );
 
 CREATE TABLE IF NOT EXISTS booking_slot (
   slot_id VARCHAR(255) PRIMARY KEY,
-  start_hour TIMESTAMP NOT NULL,
-  end_hour TIMESTAMP NOT NULL,
+  start_hour DATETIME NOT NULL,
+  end_hour DATETIME NOT NULL,
   booking_id VARCHAR(255) NOT NULL,
   FOREIGN KEY (booking_id) REFERENCES booking(booking_id)
 );
