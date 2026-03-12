@@ -1,8 +1,14 @@
-package com.octo.booking_room.entity;
+package com.octo.booking_room.entity.booking;
 
 import jakarta.persistence.*;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 import java.time.LocalDateTime;
 
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name = "booking_slot")
 public class BookingSlot {
