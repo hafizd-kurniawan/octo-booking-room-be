@@ -38,3 +38,9 @@ CREATE TABLE IF NOT EXISTS booking_slot (
   booking_id VARCHAR(255) NOT NULL,
   FOREIGN KEY (booking_id) REFERENCES booking(booking_id)
 );
+
+CREATE TABLE token_blacklist (
+    id VARCHAR(36) PRIMARY KEY,
+    token TEXT,
+    expired_at TIMESTAMP
+);

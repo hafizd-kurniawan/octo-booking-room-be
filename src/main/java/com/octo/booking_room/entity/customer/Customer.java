@@ -9,13 +9,11 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
+@Getter
+@Setter
 @Entity
 @Table(name = "customer")
 public class Customer {
@@ -30,9 +28,8 @@ public class Customer {
   private String password;
 
   @Column(name = "is_admin", length = 1)
-  private String isAdmin;
+  private Boolean isAdmin;
 
   @OneToMany(mappedBy = "customer")
   private List<Booking> bookings;
-
 }
