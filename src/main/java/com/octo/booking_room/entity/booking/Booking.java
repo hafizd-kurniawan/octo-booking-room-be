@@ -34,7 +34,7 @@ public class Booking {
   @JoinColumn(name = "room_id")
   private Room room;
 
-  @OneToMany(mappedBy = "booking")
+  @OneToMany(mappedBy = "booking", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<BookingSlot> bookingSlots;
 
 }
