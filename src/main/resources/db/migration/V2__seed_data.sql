@@ -9,8 +9,8 @@ INSERT INTO room (room_id, name, floor, type_id) VALUES
 ('rm_2', 'Meeting Room B', 3, 'rt_1');
 
 INSERT INTO booking (booking_id, status, date, customer_id, room_id) VALUES 
-('book_1', 'PAID', '2026-03-25', 'cst_12345', 'rm_1'),
-('book_2', 'PENDING', '2026-03-26', 'cst_12345', 'rm_2');
+('book_1', 'BOOKED', '2026-03-25', 'cst_12345', 'rm_1'),
+('book_2', 'BOOKED', '2026-03-26', 'cst_12345', 'rm_2');
 
 INSERT INTO booking_slot (slot_id, start_hour, end_hour, booking_id) VALUES 
 ('slot_1', '2026-03-25 09:00:00', '2026-03-25 10:00:00', 'book_1'),

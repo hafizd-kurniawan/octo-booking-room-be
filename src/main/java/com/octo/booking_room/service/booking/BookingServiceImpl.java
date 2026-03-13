@@ -94,7 +94,7 @@ public class BookingServiceImpl implements BookingService {
         booking.setCustomer(customer);
         booking.setRoom(room);
         booking.setDate(request.getDate());
-        booking.setStatus(BookingStatus.PENDING);
+        booking.setStatus(BookingStatus.BOOKED);
 
         List<BookingSlot> slots = request.getSlots().stream().map(s -> {
             BookingSlot slot = new BookingSlot();
@@ -113,6 +113,6 @@ public class BookingServiceImpl implements BookingService {
             .collect(Collectors.toList());
 
         return new CreateBookingResponse(bookingId, room.getRoomId(), customer.getCustomerId(),
-            request.getDate(), "pending", slotResponses);
+            request.getDate(), "booked", slotResponses);
     }
 }
