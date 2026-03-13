@@ -27,4 +27,8 @@ public class BookingSlot {
   @JoinColumn(name = "booking_id")
   private Booking booking;
 
+  public BookingSlot(LocalDateTime startHour, LocalDateTime endHour) {
+    this.startHour = startHour;
+    this.endHour = endHour;
+  }
 }
