@@ -1,0 +1,45 @@
+services:
+  mysql:
+    image: mysql:8
+    container_name: booking_mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: octo_booking_room
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+  
+  adminer:
+    image: adminer
+    container_name: booking_adminer
+    restart: always
+    ports:
+      - "8081:8080"
+    depends_on:
+      - mysql
+
+  backend:
+    build: .
+    develop:
+      watch:
+        - action: rebuild
+          path: .
+    container_name: booking_backend
+    depends_on:
+      - mysql
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/octo_booking_room
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+
+volumes:
+  mysql_data:

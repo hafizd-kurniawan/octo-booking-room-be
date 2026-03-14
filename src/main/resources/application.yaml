@@ -1,3 +1,35 @@
+server:
+  port: ${PORT:8080}
+
 spring:
   application:
     name: booking-room
+
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://${MYSQLHOST:localhost}:${MYSQLPORT:3306}/${MYSQLDATABASE:octo_booking_room}?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true}
+    username: ${SPRING_DATASOURCE_USERNAME:${MYSQLUSER:root}}
+    password: ${SPRING_DATASOURCE_PASSWORD:${MYSQLPASSWORD:root}}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
+jwt:
+  secret: "8a7f1e3c-7a2f-4d9b-9d5e-1234567890abcdef1234567890abcdef"
