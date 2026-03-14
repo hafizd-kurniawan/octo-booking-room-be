@@ -33,8 +33,11 @@ public class BookingServiceImpl implements BookingService {
     private final RoomRepository roomRepository;
 
     @Override
-    public List<BookingBasicResponse> getMyBookings(String customerId) {
-        List<Booking> bookings = bookingRepository.findByCustomer_CustomerId(customerId);
+    public List<BookingBasicResponse> getMyBookingsByEmail(String email) {
+        Customer customer = customerRepository.findByEmail(email)
+            .orElseThrow(() -> new ResourceNotFoundException("Customer with email " + email + " not found"));
+
+        List<Booking> bookings = bookingRepository.findByCustomer_CustomerId(customer.getCustomerId());
 
         return bookings.stream().map(booking -> {
             RoomDto roomDto = new RoomDto(

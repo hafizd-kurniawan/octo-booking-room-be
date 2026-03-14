@@ -10,7 +10,7 @@ import java.util.List;
 
 public interface BookingService {
 
-    List<BookingBasicResponse> getMyBookings(String customerId);
+    List<BookingBasicResponse> getMyBookingsByEmail(String email);
 
     BookingDetailResponse getBookingDetail(String bookingId);
 

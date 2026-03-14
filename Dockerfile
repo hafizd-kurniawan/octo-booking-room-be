@@ -1,23 +1,24 @@
-FROM maven:3.9.9-eclipse-temurin-21 AS build
+FROM maven:3.9.9-eclipse-temurin-21 AS builder
 
 WORKDIR /app
 
-# copy dependency dulu
 COPY pom.xml .
+COPY .mvn .mvn
+COPY mvnw .
+RUN chmod +x mvnw
 
-# download dependency (akan di cache docker)
-RUN mvn dependency:go-offline
+RUN ./mvnw -B dependency:go-offline
 
-# baru copy source code
-COPY src ./src
+COPY src src
 
-# build jar
-RUN mvn clean package -DskipTests
+RUN ./mvnw -B clean package -DskipTests
 
-FROM eclipse-temurin:21-jdk
+FROM eclipse-temurin:21-jre
 
 WORKDIR /app
 
-COPY --from=build /app/target/*.jar app.jar
+COPY --from=builder /app/target/*.jar app.jar
 
-ENTRYPOINT ["java","-jar","app.jar"]
+EXPOSE 8080
+
+ENTRYPOINT ["java", "-jar", "app.jar"]

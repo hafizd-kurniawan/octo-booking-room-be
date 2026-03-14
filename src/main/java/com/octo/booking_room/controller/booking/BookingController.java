@@ -27,21 +27,20 @@ public class BookingController {
     }
 
     @GetMapping("/my")
-    public ResponseEntity<WebResponse<List<BookingBasicResponse>>> getMyBookings(
-            @RequestHeader("Authorization") String authorizationHeader,
-            @RequestParam("customer_id") String customerId) {
-        List<BookingBasicResponse> response = bookingService.getMyBookings(customerId);
+    public ResponseEntity<WebResponse<List<BookingBasicResponse>>> getMyBookings() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        List<BookingBasicResponse> response = bookingService.getMyBookingsByEmail(email);
         return ResponseEntity.ok(new WebResponse<>("success", "Bookings retrieved", response));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<WebResponse<BookingDetailResponse>> getBookingDetail(@RequestHeader("Authorization") String authorizationHeader, @PathVariable("id") String id) {
+    public ResponseEntity<WebResponse<BookingDetailResponse>> getBookingDetail(@PathVariable("id") String id) {
         BookingDetailResponse response = bookingService.getBookingDetail(id);
         return ResponseEntity.ok(new WebResponse<>("success", "Booking detail retrieved", response));
     }
 
     @PatchMapping("/{id}/cancel")
-    public ResponseEntity<WebResponse<CancelBookingResponse>> cancelBooking(@RequestHeader("Authorization") String authorizationHeader, @PathVariable("id") String id) {
+    public ResponseEntity<WebResponse<CancelBookingResponse>> cancelBooking(@PathVariable("id") String id) {
         CancelBookingResponse response = bookingService.cancelBooking(id);
         return ResponseEntity.ok(new WebResponse<>("success", "Booking cancelled successfully", response));
     }
