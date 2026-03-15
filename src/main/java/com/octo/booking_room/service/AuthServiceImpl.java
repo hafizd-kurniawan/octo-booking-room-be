@@ -32,7 +32,7 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public RegisterResponse register(RegisterRequest request) {
         if (customerRepository.findByEmail(request.getEmail()).isPresent()) {
-            throw new RuntimeException("Email already exists");
+            throw new EmailAlreadyExists();
         }
 
         Customer customer = new Customer();
@@ -56,7 +56,7 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public AuthResponse login(LoginRequest request) {
         Customer customer = customerRepository.findByEmail(request.getEmail())
-            .orElseThrow(() -> new EmailAlreadyExists());
+            .orElseThrow(() -> new RuntimeException("Invalid email or password"));
 
         if (!passwordEncoder.matches(request.getPassword(), customer.getPassword())) {
             throw new RuntimeException("Invalid email or password");
