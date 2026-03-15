@@ -51,8 +51,16 @@ public class AuthController {
 
     @PostMapping("/logout")
     public ResponseEntity<ApiResponse<String>> logout(@RequestHeader("Authorization") String authHeader) {
-        String token = authHeader.replace("Bearer ", "");
-        authService.logout(token);
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            throw new RuntimeException("Authorization header must include Bearer token");
+        }
+        String token = authHeader.substring(7);
+        boolean loggedOut = authService.logout(token);
+        if (!loggedOut) {
+            return ResponseEntity.status(HttpStatus.OK).body(
+                new ApiResponse<String>("success", "Token already logged out", null)
+            );
+        }
         return ResponseEntity.status(HttpStatus.OK).body(
             new ApiResponse<String>("success", "Logout successful", null)
         );

@@ -32,4 +32,4 @@ management:
         enabled: true
 
 jwt:
-  secret: ${JWT_SECRET}
+  secret: ${JWT_SECRET:J3CW7Xf3vQ9jgJTjOQ4SWMs47Ik2UInPva9PFBNL5dU=}

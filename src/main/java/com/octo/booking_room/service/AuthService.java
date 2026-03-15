@@ -10,5 +10,5 @@ public interface AuthService {
     
     AuthResponse login(LoginRequest req);
 
-    void logout(String token);
+    boolean logout(String token);
 }

@@ -24,7 +24,7 @@ import io.jsonwebtoken.security.Keys;
 public class JwtUtil {
 
     // injected from configuration so it can be changed per environment
-    @Value("${jwt.secret:change-me-to-a-very-long-secret-at-least-32-bytes}")
+    @Value("${jwt.secret:}")
     private String secret;
 
     private SecretKey key;
@@ -35,10 +35,14 @@ public class JwtUtil {
 
     @PostConstruct
     private void init() {
-        // Keys.hmacShaKeyFor will throw an IllegalArgumentException if the
-        // provided byte array is too short for the chosen algorithm (HS256 by
-        // default).  Using @PostConstruct lets us fail early with a clear
-        // message instead of a cascading unsatisfied dependency.
+        // Ensure a secure, non-empty secret of minimum length before building key.
+        if (secret == null || secret.trim().isEmpty()) {
+            throw new IllegalStateException("JWT secret is not configured. Set jwt.secret in application.yaml or JWT_SECRET environment variable.");
+        }
+        if (secret.getBytes().length < 32) {
+            throw new IllegalStateException("JWT secret is too short. It must be at least 32 bytes long.");
+        }
+
         key = Keys.hmacShaKeyFor(secret.getBytes());
     }
 
@@ -73,5 +77,14 @@ public class JwtUtil {
         } catch (Exception e) {
             return false;
         }
+    }
+
+    public Date getExpirationFromToken(String token) {
+        return Jwts.parser()
+            .verifyWith(key)
+            .build()
+            .parseSignedClaims(token)
+            .getPayload()
+            .getExpiration();
     }
 }

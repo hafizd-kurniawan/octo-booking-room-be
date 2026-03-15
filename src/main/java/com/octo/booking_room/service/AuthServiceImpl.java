@@ -73,13 +73,19 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public void logout(String token) {
+    public boolean logout(String token) {
+        if (!jwtUtil.validateToken(token)) {
+            throw new RuntimeException("Invalid token: cannot logout with invalid token.");
+        }
+        if (tokenBlacklistRepository.existsById(token)) {
+            // Already logged out with this token; idempotent behavior.
+            return false;
+        }
         TokenBlacklist blacklistEntry = new TokenBlacklist();
         blacklistEntry.setToken(token);
-        // Set expired_at to the current time or a specific expiration time
-        blacklistEntry.setExpiredAt(jwtUtil.getExpiration());
+        blacklistEntry.setExpiredAt(jwtUtil.getExpirationFromToken(token).toString());
         tokenBlacklistRepository.save(blacklistEntry);
-        // return new AuthResponse(null);
+        return true;
     }
 
 }
