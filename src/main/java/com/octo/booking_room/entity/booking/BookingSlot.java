@@ -1,14 +1,18 @@
 package com.octo.booking_room.entity.booking;
 
-import jakarta.persistence.*;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.time.LocalDateTime;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
+@Getter
+@Setter
 @Entity
 @Table(name = "booking_slot")
 public class BookingSlot {
@@ -17,18 +21,13 @@ public class BookingSlot {
   @Column(name = "slot_id")
   private String slotId;
 
-  @Column(name = "start_hour")
-  private LocalDateTime startHour;
-
-  @Column(name = "end_hour")
-  private LocalDateTime endHour;
-
   @ManyToOne
-  @JoinColumn(name = "booking_id")
+  @JoinColumn(name = "booking_id", nullable = false)
   private Booking booking;
 
-  public BookingSlot(LocalDateTime startHour, LocalDateTime endHour) {
-    this.startHour = startHour;
-    this.endHour = endHour;
-  }
+  @Column(name = "start_hour", nullable = false)
+  private LocalDateTime startHour;
+
+  @Column(name = "end_hour", nullable = false)
+  private LocalDateTime endHour;
 }
