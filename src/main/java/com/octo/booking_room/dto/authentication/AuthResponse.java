@@ -7,6 +7,7 @@ import lombok.Setter;
 @Setter
 public class AuthResponse {
     private String accessToken;
+    private String name;
     private String email;
     private Boolean isAdmin;
 
