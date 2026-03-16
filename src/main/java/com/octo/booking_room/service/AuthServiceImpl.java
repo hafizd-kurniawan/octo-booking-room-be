@@ -10,6 +10,7 @@ import com.octo.booking_room.dto.authentication.RegisterResponse;
 import com.octo.booking_room.entity.customer.Customer;
 import com.octo.booking_room.entity.TokenBlacklist;
 import com.octo.booking_room.exception.EmailAlreadyExists;
+import com.octo.booking_room.exception.InvalidCredentialsException;
 import com.octo.booking_room.repository.customer.CustomerRepository;
 import com.octo.booking_room.repository.TokenBlacklistRepository;
 import com.octo.booking_room.utils.IdGenerator;
@@ -32,7 +33,7 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public RegisterResponse register(RegisterRequest request) {
         if (customerRepository.findByEmail(request.getEmail()).isPresent()) {
-            throw new RuntimeException("Email already exists");
+            throw new EmailAlreadyExists();
         }
 
         Customer customer = new Customer();
@@ -56,10 +57,10 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public AuthResponse login(LoginRequest request) {
         Customer customer = customerRepository.findByEmail(request.getEmail())
-            .orElseThrow(() -> new EmailAlreadyExists());
+            .orElseThrow(() -> new InvalidCredentialsException());
 
         if (!passwordEncoder.matches(request.getPassword(), customer.getPassword())) {
-            throw new RuntimeException("Invalid email or password");
+            throw new InvalidCredentialsException();
         }
 
         String token = jwtUtil.generateToken(customer.getEmail());
