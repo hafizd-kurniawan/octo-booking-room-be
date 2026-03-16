@@ -15,5 +15,6 @@ public class BookingDetailResponse {
     private String room;
     private LocalDate date;
     private String status;
+    private java.util.List<BookingSlotBasicResponse> slots;
 
 }
