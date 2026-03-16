@@ -66,6 +66,7 @@ public class AuthServiceImpl implements AuthService {
         AuthResponse response = new AuthResponse(token);
 
         response.setAccessToken(token);
+        response.setName(customer.getName());
         response.setEmail(customer.getEmail());
         response.setIsAdmin(customer.getIsAdmin());
 
