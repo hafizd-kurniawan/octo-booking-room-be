@@ -23,18 +23,42 @@ public class GlobalExceptionHandler {
     return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
   }
 
-  // BARU: Handle AccessDeniedException (403 Forbidden)
   @ExceptionHandler(AccessDeniedException.class)
   public ResponseEntity<WebResponse<String>> handleAccessDeniedException(AccessDeniedException ex) {
     WebResponse<String> response = new WebResponse<>("error", "Access denied: " + ex.getMessage(), null);
     return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
   }
 
-  // BARU: Handle UsernameNotFoundException (401 Unauthorized)
   @ExceptionHandler(UsernameNotFoundException.class)
   public ResponseEntity<WebResponse<String>> handleUsernameNotFoundException(UsernameNotFoundException ex) {
     WebResponse<String> response = new WebResponse<>("error", "Invalid credentials", null);
     return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+  }
+
+  @ExceptionHandler(InvalidCredentialsException.class)
+  public ResponseEntity<ApiResponse<String>> invalidCredentials(InvalidCredentialsException ex) {
+    ApiResponse<String> body = new ApiResponse<>("error", ex.getMessage(), null);
+    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(body);
+  }
+
+  @ExceptionHandler(BadRequestException.class)
+  public ResponseEntity<WebResponse<String>> handleBadRequestException(BadRequestException ex) {
+    WebResponse<String> response = new WebResponse<>("error", ex.getMessage(), null);
+    return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+  }
+
+  @ExceptionHandler(MethodArgumentNotValidException.class)
+  public ResponseEntity<ApiResponse<Map<String, String>>> handleValidation(MethodArgumentNotValidException ex) {
+    Map<String, String> errors = ex.getBindingResult().getFieldErrors().stream()
+        .collect(Collectors.toMap(FieldError::getField, FieldError::getDefaultMessage));
+    ApiResponse<Map<String, String>> body = new ApiResponse<>("error", "Validation failed", errors);
+    return ResponseEntity.badRequest().body(body);
+  }
+
+  @ExceptionHandler(EmailAlreadyExists.class)
+  public ResponseEntity<ApiResponse<String>> emailAlreadyExists(EmailAlreadyExists ex) {
+    ApiResponse<String> body = new ApiResponse<>("error", ex.getMessage(), null);
+    return ResponseEntity.status(HttpStatus.CONFLICT).body(body);
   }
 
   @ExceptionHandler(Exception.class)
@@ -42,28 +66,5 @@ public class GlobalExceptionHandler {
     ex.printStackTrace();
     WebResponse<String> response = new WebResponse<>("error", "An unexpected error occurred: " + ex.getMessage(), null);
     return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
-  }
-
-  @ExceptionHandler(MethodArgumentNotValidException.class)
-  public ResponseEntity<ApiResponse<Map<String, String>>> handleValidation(
-      MethodArgumentNotValidException ex) {
-    Map<String, String> errors = ex.getBindingResult().getFieldErrors().stream()
-        .collect(Collectors.toMap(FieldError::getField, FieldError::getDefaultMessage));
-    ApiResponse<Map<String, String>> body = new ApiResponse<>(
-        "error", "Validation failed", errors);
-    return ResponseEntity.badRequest().body(body);
-  }
-
-  @ExceptionHandler(EmailAlreadyExists.class)
-  public ResponseEntity<ApiResponse<String>> emailAlreadyExists(EmailAlreadyExists ex) {
-    ApiResponse<String> body = new ApiResponse<>(
-        "error", ex.getMessage(), null);
-    return ResponseEntity.badRequest().body(body);
-  }
-
-  @ExceptionHandler(BadRequestException.class)
-  public ResponseEntity<WebResponse<String>> handleBadRequestException(BadRequestException ex) {
-    WebResponse<String> response = new WebResponse<>("error", ex.getMessage(), null);
-    return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
   }
 }
