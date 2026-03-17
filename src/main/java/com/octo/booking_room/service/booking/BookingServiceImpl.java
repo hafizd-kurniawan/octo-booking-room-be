@@ -44,25 +44,22 @@ public class BookingServiceImpl implements BookingService {
     Customer customer = findCustomerByEmail(email);
 
     List<Booking> bookings = bookingRepository.findByCustomer_CustomerId(customer.getCustomerId());
-    log.info("bookings: {}", bookings);
+    log.info("getMyBookings for {}: {} booking(s) found", email, bookings.size());
     return bookings.stream()
-        .map(booking -> {
-          RoomDto roomDto = new RoomDto(
-              booking.getRoom().getRoomId(),
-              booking.getRoom().getName(),
-              booking.getRoom().getFloor());
+        .map(this::toBookingBasicResponse)
+        .collect(Collectors.toList());
+  }
 
-          List<BookingSlotBasicResponse> slotResponses = booking.getBookingSlots().stream()
-              .map(s -> new BookingSlotBasicResponse(s.getSlotId(), s.getStartHour(), s.getEndHour()))
-              .collect(Collectors.toList());
-
-          return new BookingBasicResponse(
-              booking.getBookingId(),
-              roomDto,
-              booking.getDate(),
-              booking.getStatus().name().toLowerCase(),
-              slotResponses);
-        })
+  @Override
+  public List<BookingBasicResponse> getAllBookings(String requesterEmail) {
+    Customer requester = findCustomerByEmail(requesterEmail);
+    if (!Boolean.TRUE.equals(requester.getIsAdmin())) {
+      throw new AccessDeniedException("Only admins can view all bookings");
+    }
+    List<Booking> bookings = bookingRepository.findAll();
+    log.info("getAllBookings by admin {}: {} booking(s) found", requesterEmail, bookings.size());
+    return bookings.stream()
+        .map(this::toBookingBasicResponse)
         .collect(Collectors.toList());
   }
 
@@ -99,20 +96,31 @@ public class BookingServiceImpl implements BookingService {
   }
 
   @Override
-  public CreateBookingResponse createBooking(String email, CreateBookingRequest request) {
+  public CreateBookingResponse createBooking(String requesterEmail, CreateBookingRequest request) {
     validateSlots(request.getSlots());
 
-    // Cross-booking overlap check
+    Customer requester = findCustomerByEmail(requesterEmail);
+    boolean isAdmin = Boolean.TRUE.equals(requester.getIsAdmin());
+    
+    Customer bookingOwner;
+    if (request.getCustomerEmail() != null && !request.getCustomerEmail().isBlank()) {
+      if (!isAdmin) {
+        throw new AccessDeniedException("Only admins can create bookings on behalf of other customers");
+      }
+      bookingOwner = findCustomerByEmail(request.getCustomerEmail());
+    } else {
+      bookingOwner = requester;
+    }
+
     validateCrossBooking(request.getRoomId(), request.getDate(), request.getSlots());
 
-    Customer customer = findCustomerByEmail(email);
     Room room = roomRepository.findById(request.getRoomId())
         .orElseThrow(() -> new ResourceNotFoundException("Room " + request.getRoomId() + " not found"));
 
     String bookingId = IdGenerator.generateId("book-");
     Booking booking = new Booking();
     booking.setBookingId(bookingId);
-    booking.setCustomer(customer);
+    booking.setCustomer(bookingOwner);
     booking.setRoom(room);
     booking.setDate(request.getDate());
     booking.setStatus(BookingStatus.BOOKED);
@@ -138,9 +146,27 @@ public class BookingServiceImpl implements BookingService {
     return new CreateBookingResponse(
         bookingId,
         room.getRoomId(),
-        customer.getCustomerId(),
+        bookingOwner.getCustomerId(),
         request.getDate(),
         "booked",
+        slotResponses);
+  }
+
+  private BookingBasicResponse toBookingBasicResponse(Booking booking) {
+    RoomDto roomDto = new RoomDto(
+        booking.getRoom().getRoomId(),
+        booking.getRoom().getName(),
+        booking.getRoom().getFloor());
+
+    List<BookingSlotBasicResponse> slotResponses = booking.getBookingSlots().stream()
+        .map(s -> new BookingSlotBasicResponse(s.getSlotId(), s.getStartHour(), s.getEndHour()))
+        .collect(Collectors.toList());
+
+    return new BookingBasicResponse(
+        booking.getBookingId(),
+        roomDto,
+        booking.getDate(),
+        booking.getStatus().name().toLowerCase(),
         slotResponses);
   }
 

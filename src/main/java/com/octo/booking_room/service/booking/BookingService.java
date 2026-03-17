@@ -11,6 +11,8 @@ import java.util.List;
 public interface BookingService {
   List<BookingBasicResponse> getMyBookingsByEmail(String email);
 
+  List<BookingBasicResponse> getAllBookings(String requesterEmail);
+
   BookingDetailResponse getBookingDetail(String email, String bookingId);
 
   CancelBookingResponse cancelBooking(String email, String bookingId);
