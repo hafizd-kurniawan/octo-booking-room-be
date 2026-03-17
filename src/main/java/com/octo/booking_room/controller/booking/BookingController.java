@@ -32,6 +32,13 @@ public class BookingController {
     return ResponseEntity.ok(new WebResponse<>("success", "Bookings retrieved", response));
   }
 
+  @GetMapping("/all")
+  public ResponseEntity<WebResponse<List<BookingBasicResponse>>> getAllBookings() {
+    String email = SecurityContextHolder.getContext().getAuthentication().getName();
+    List<BookingBasicResponse> response = bookingService.getAllBookings(email);
+    return ResponseEntity.ok(new WebResponse<>("success", "All bookings retrieved", response));
+  }
+
   @GetMapping("/{id}")
   public ResponseEntity<WebResponse<BookingDetailResponse>> getBookingDetail(@PathVariable("id") String id) {
     String email = SecurityContextHolder.getContext().getAuthentication().getName();
