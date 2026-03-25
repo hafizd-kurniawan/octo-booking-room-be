@@ -2,6 +2,8 @@ package com.octo.booking_room.controller.booking;
 
 import com.octo.booking_room.dto.booking.BookingBasicResponse;
 import com.octo.booking_room.dto.booking.BookingDetailResponse;
+import com.octo.booking_room.dto.booking.BookingFilter;
+import com.octo.booking_room.dto.booking.BookingStatsResponse;
 import com.octo.booking_room.dto.booking.CancelBookingResponse;
 import com.octo.booking_room.dto.booking.CreateBookingRequest;
 import com.octo.booking_room.dto.booking.CreateBookingResponse;
@@ -33,10 +35,39 @@ public class BookingController {
   }
 
   @GetMapping("/all")
-  public ResponseEntity<WebResponse<List<BookingBasicResponse>>> getAllBookings() {
+  public ResponseEntity<WebResponse<List<BookingBasicResponse>>> getAllBookings(
+      @RequestParam(name = "room_id",      required = false) String roomId,
+      @RequestParam(name = "room_type_id", required = false) String roomTypeId,
+      @RequestParam(name = "month",        required = false) Integer month,
+      @RequestParam(name = "year",         required = false) Integer year) {
+ 
     String email = SecurityContextHolder.getContext().getAuthentication().getName();
-    List<BookingBasicResponse> response = bookingService.getAllBookings(email);
+ 
+    BookingFilter filter = new BookingFilter();
+    filter.setRoomId(roomId);
+    filter.setRoomTypeId(roomTypeId);
+    filter.setMonth(month);
+    filter.setYear(year);
+ 
+    List<BookingBasicResponse> response = bookingService.getAllBookings(email, filter);
     return ResponseEntity.ok(new WebResponse<>("success", "All bookings retrieved", response));
+  }
+
+  @GetMapping("/stats")
+  public ResponseEntity<WebResponse<BookingStatsResponse>> getBookingStats(
+      @RequestParam(name = "room_type_id", required = false) String roomTypeId,
+      @RequestParam(name = "month",        required = false) Integer month,
+      @RequestParam(name = "year",         required = false) Integer year) {
+ 
+    String email = SecurityContextHolder.getContext().getAuthentication().getName();
+ 
+    BookingFilter filter = new BookingFilter();
+    filter.setRoomTypeId(roomTypeId);
+    filter.setMonth(month);
+    filter.setYear(year);
+ 
+    BookingStatsResponse response = bookingService.getBookingStats(email, filter);
+    return ResponseEntity.ok(new WebResponse<>("success", "Booking statistics retrieved", response));
   }
 
   @GetMapping("/{id}")
