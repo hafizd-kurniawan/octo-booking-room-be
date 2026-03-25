@@ -5,6 +5,10 @@ import com.octo.booking_room.dto.room.CreateRoomRequest;
 import com.octo.booking_room.dto.room.RoomResponse;
 import com.octo.booking_room.service.room.RoomService;
 import com.octo.booking_room.utils.WebResponse;
+
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import jakarta.validation.Valid;
+
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/rooms")
+@SecurityRequirement(name = "bearerAuth")
 public class RoomController {
 
     private final RoomService roomService;
@@ -53,7 +58,7 @@ public class RoomController {
     }
 
     @PostMapping
-    public ResponseEntity<WebResponse<RoomResponse>> createRoom(@RequestBody CreateRoomRequest request) {
+    public ResponseEntity<WebResponse<RoomResponse>> createRoom(@Valid @RequestBody CreateRoomRequest request) {
         RoomResponse response = roomService.createRoom(request);
         return ResponseEntity.status(HttpStatus.CREATED)
             .body(new WebResponse<>("success", "Room created successfully", response));

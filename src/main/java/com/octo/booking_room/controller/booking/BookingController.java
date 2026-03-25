@@ -13,6 +13,7 @@ import com.octo.booking_room.exception.BadRequestException;
 import com.octo.booking_room.service.booking.BookingExportService;
 import com.octo.booking_room.service.booking.BookingService;
 import com.octo.booking_room.utils.WebResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpHeaders;
@@ -26,6 +27,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/bookings")
+@SecurityRequirement(name = "bearerAuth")
 public class BookingController {
 
   private final BookingService bookingService;
