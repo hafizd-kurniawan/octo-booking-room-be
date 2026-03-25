@@ -7,10 +7,13 @@ import com.octo.booking_room.dto.booking.BookingStatsResponse;
 import com.octo.booking_room.dto.booking.CancelBookingResponse;
 import com.octo.booking_room.dto.booking.CreateBookingRequest;
 import com.octo.booking_room.dto.booking.CreateBookingResponse;
+import com.octo.booking_room.service.booking.BookingExportService;
 import com.octo.booking_room.service.booking.BookingService;
 import com.octo.booking_room.utils.WebResponse;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
@@ -22,9 +25,11 @@ import java.util.List;
 public class BookingController {
 
   private final BookingService bookingService;
+  private final BookingExportService bookingExportService;
 
-  public BookingController(BookingService bookingService) {
+  public BookingController(BookingService bookingService, BookingExportService bookingExportService) {
     this.bookingService = bookingService;
+    this.bookingExportService = bookingExportService;
   }
 
   @GetMapping("/my")
@@ -51,6 +56,49 @@ public class BookingController {
  
     List<BookingBasicResponse> response = bookingService.getAllBookings(email, filter);
     return ResponseEntity.ok(new WebResponse<>("success", "All bookings retrieved", response));
+  }
+
+  @GetMapping("/export/excel")
+  public ResponseEntity<byte[]> exportBookingsToExcel(
+      @RequestParam(name = "room_id", required = false) String roomId,
+      @RequestParam(name = "room_type_id", required = false) String roomTypeId,
+      @RequestParam(name = "month", required = false) Integer month,
+      @RequestParam(name = "year", required = false) Integer year) {
+    String email = SecurityContextHolder.getContext().getAuthentication().getName();
+
+    BookingFilter filter = new BookingFilter();
+    filter.setRoomId(roomId);
+    filter.setRoomTypeId(roomTypeId);
+    filter.setMonth(month);
+    filter.setYear(year);
+
+    byte[] file = bookingExportService.exportBookingsToExcel(email, filter);
+    return ResponseEntity.ok()
+        .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=bookings-export.xlsx")
+        .contentType(MediaType.parseMediaType(
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+        .body(file);
+  }
+
+  @GetMapping("/export/pdf")
+  public ResponseEntity<byte[]> exportBookingsToPdf(
+      @RequestParam(name = "room_id", required = false) String roomId,
+      @RequestParam(name = "room_type_id", required = false) String roomTypeId,
+      @RequestParam(name = "month", required = false) Integer month,
+      @RequestParam(name = "year", required = false) Integer year) {
+    String email = SecurityContextHolder.getContext().getAuthentication().getName();
+
+    BookingFilter filter = new BookingFilter();
+    filter.setRoomId(roomId);
+    filter.setRoomTypeId(roomTypeId);
+    filter.setMonth(month);
+    filter.setYear(year);
+
+    byte[] file = bookingExportService.exportBookingsToPdf(email, filter);
+    return ResponseEntity.ok()
+        .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=bookings-export.pdf")
+        .contentType(MediaType.APPLICATION_PDF)
+        .body(file);
   }
 
   @GetMapping("/stats")
