@@ -189,6 +189,9 @@ public class BookingExportServiceImpl implements BookingExportService {
     if (filter.getMonth() != null && booking.getDate().getMonthValue() != filter.getMonth()) {
       return false;
     }
+    if (filter.getStatus() != null && booking.getStatus() != filter.getStatus()) {
+      return false;
+    }
     return true;
   }
 
