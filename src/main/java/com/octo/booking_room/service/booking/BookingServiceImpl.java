@@ -2,6 +2,8 @@ package com.octo.booking_room.service.booking;
 
 import com.octo.booking_room.dto.booking.BookingBasicResponse;
 import com.octo.booking_room.dto.booking.BookingDetailResponse;
+import com.octo.booking_room.dto.booking.BookingStatsResponse;
+import com.octo.booking_room.dto.booking.BookingFilter;
 import com.octo.booking_room.dto.booking.BookingSlotBasicResponse;
 import com.octo.booking_room.dto.booking.BookingSlotResponse;
 import com.octo.booking_room.dto.booking.CancelBookingResponse;
@@ -25,9 +27,8 @@ import org.springframework.stereotype.Service;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
+import java.time.format.TextStyle;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -51,16 +52,66 @@ public class BookingServiceImpl implements BookingService {
   }
 
   @Override
-  public List<BookingBasicResponse> getAllBookings(String requesterEmail) {
-    Customer requester = findCustomerByEmail(requesterEmail);
-    if (!Boolean.TRUE.equals(requester.getIsAdmin())) {
-      throw new AccessDeniedException("Only admins can view all bookings");
-    }
+  public List<BookingBasicResponse> getAllBookings(String requesterEmail, BookingFilter filter) {
+    requireAdmin(requesterEmail);
+ 
     List<Booking> bookings = bookingRepository.findAll();
-    log.info("getAllBookings by admin {}: {} booking(s) found", requesterEmail, bookings.size());
+    log.info("getAllBookings by admin {}: {} total before filter", requesterEmail, bookings.size());
+ 
     return bookings.stream()
+        .filter(b -> matchesFilter(b, filter))
         .map(this::toBookingBasicResponse)
         .collect(Collectors.toList());
+  }
+
+  @Override
+  public BookingStatsResponse getBookingStats(String requesterEmail, BookingFilter filter) {
+    requireAdmin(requesterEmail);
+ 
+    List<Booking> bookings = bookingRepository.findAll().stream()
+        .filter(b -> matchesFilter(b, filter))
+        .collect(Collectors.toList());
+ 
+    int total = bookings.size();
+ 
+    // By room type 
+    Map<String, List<Booking>> byRoomType = bookings.stream()
+        .collect(Collectors.groupingBy(b -> b.getRoom().getRoomType().getTypeId()));
+ 
+    List<BookingStatsResponse.RoomTypeStat> roomTypeStats = byRoomType.entrySet().stream()
+        .map(e -> {
+          var roomType = e.getValue().get(0).getRoom().getRoomType();
+          return new BookingStatsResponse.RoomTypeStat(
+              roomType.getTypeId(),
+              roomType.getName(),
+              e.getValue().size());
+        })
+        .sorted(Comparator.comparingInt(BookingStatsResponse.RoomTypeStat::getCount).reversed())
+        .collect(Collectors.toList());
+ 
+    // By year+month
+    Map<String, List<Booking>> byMonth = bookings.stream()
+        .collect(Collectors.groupingBy(b -> {
+          LocalDate d = b.getDate();
+          return d.getYear() + "-" + String.format("%02d", d.getMonthValue());
+        }));
+ 
+    List<BookingStatsResponse.MonthStat> monthStats = byMonth.entrySet().stream()
+        .map(e -> {
+          LocalDate sample = e.getValue().get(0).getDate();
+          String label = sample.getMonth()
+              .getDisplayName(TextStyle.SHORT, Locale.ENGLISH) + " " + sample.getYear();
+          return new BookingStatsResponse.MonthStat(
+              sample.getYear(),
+              sample.getMonthValue(),
+              label,
+              e.getValue().size());
+        })
+        .sorted(Comparator.comparingInt(BookingStatsResponse.MonthStat::getYear)
+            .thenComparingInt(BookingStatsResponse.MonthStat::getMonth))
+        .collect(Collectors.toList());
+ 
+    return new BookingStatsResponse(total, roomTypeStats, monthStats);
   }
 
   @Override
@@ -150,6 +201,35 @@ public class BookingServiceImpl implements BookingService {
         request.getDate(),
         "booked",
         slotResponses);
+  }
+
+  private void requireAdmin(String email) {
+    Customer requester = findCustomerByEmail(email);
+    if (!Boolean.TRUE.equals(requester.getIsAdmin())) {
+      throw new AccessDeniedException("Only admins can perform this action");
+    }
+  }
+
+  private boolean matchesFilter(Booking booking, BookingFilter filter) {
+    if (filter == null) return true;
+ 
+    if (filter.getRoomId() != null && !filter.getRoomId().isBlank()) {
+      if (!booking.getRoom().getRoomId().equals(filter.getRoomId())) return false;
+    }
+ 
+    if (filter.getRoomTypeId() != null && !filter.getRoomTypeId().isBlank()) {
+      if (!booking.getRoom().getRoomType().getTypeId().equals(filter.getRoomTypeId())) return false;
+    }
+ 
+    if (filter.getYear() != null) {
+      if (booking.getDate().getYear() != filter.getYear()) return false;
+    }
+ 
+    if (filter.getMonth() != null) {
+      if (booking.getDate().getMonthValue() != filter.getMonth()) return false;
+    }
+ 
+    return true;
   }
 
   private BookingBasicResponse toBookingBasicResponse(Booking booking) {
