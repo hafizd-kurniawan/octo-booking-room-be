@@ -2,6 +2,7 @@ package com.octo.booking_room.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -34,6 +35,23 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
+
+                // ADMIN ONLY
+                .requestMatchers(HttpMethod.POST, "/api/admin/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.POST, "/api/rooms/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.PUT, "/api/rooms/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.PATCH, "/api/rooms/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/api/rooms/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.POST, "/api/room-types/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.PUT, "/api/room-types/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.PATCH, "/api/room-types/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/api/room-types/**").hasRole("ADMIN")
+
+                // ADMIN + CUSTOMER
+                .requestMatchers(HttpMethod.GET, "/api/rooms/**").authenticated()
+                .requestMatchers(HttpMethod.GET, "/api/room-types/**").authenticated()
+
+                // PUBLIC
                 .requestMatchers("/", "/docs", "/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html", "/api/auth/**").permitAll()
                 .anyRequest().authenticated()
             )

@@ -55,6 +55,7 @@ public class BookingController {
 
   @GetMapping("/stats")
   public ResponseEntity<WebResponse<BookingStatsResponse>> getBookingStats(
+      @RequestParam(name = "room_id",      required = false) String roomId,
       @RequestParam(name = "room_type_id", required = false) String roomTypeId,
       @RequestParam(name = "month",        required = false) Integer month,
       @RequestParam(name = "year",         required = false) Integer year) {
@@ -62,6 +63,7 @@ public class BookingController {
     String email = SecurityContextHolder.getContext().getAuthentication().getName();
  
     BookingFilter filter = new BookingFilter();
+    filter.setRoomId(roomId);
     filter.setRoomTypeId(roomTypeId);
     filter.setMonth(month);
     filter.setYear(year);

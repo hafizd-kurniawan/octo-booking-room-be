@@ -16,6 +16,9 @@ public class BookingStatsResponse {
  
   @JsonProperty("by_room_type")
   private List<RoomTypeStat> byRoomType;
+
+  @JsonProperty("by_room")
+  private List<RoomStat> byRoom;
  
   @JsonProperty("by_month")
   private List<MonthStat> byMonth;
@@ -30,6 +33,27 @@ public class BookingStatsResponse {
     @JsonProperty("type_name")
     private String typeName;
  
+    private Integer count;
+  }
+
+  @Data
+  @NoArgsConstructor
+  @AllArgsConstructor
+  public static class RoomStat {
+    @JsonProperty("room_id")
+    private String roomId;
+
+    @JsonProperty("room_name")
+    private String roomName;
+
+    private Integer floor;
+
+    @JsonProperty("type_id")
+    private String typeId;
+
+    @JsonProperty("type_name")
+    private String typeName;
+
     private Integer count;
   }
  

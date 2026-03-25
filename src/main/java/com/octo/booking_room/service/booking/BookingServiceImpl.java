@@ -56,7 +56,7 @@ public class BookingServiceImpl implements BookingService {
     requireAdmin(requesterEmail);
  
     List<Booking> bookings = bookingRepository.findAll();
-    log.info("getAllBookings by admin {}: {} total before filter", requesterEmail, bookings.size());
+    // log.info("getAllBookings by admin {}: {} total before filter", requesterEmail, bookings.size());
  
     return bookings.stream()
         .filter(b -> matchesFilter(b, filter))
@@ -88,6 +88,26 @@ public class BookingServiceImpl implements BookingService {
         })
         .sorted(Comparator.comparingInt(BookingStatsResponse.RoomTypeStat::getCount).reversed())
         .collect(Collectors.toList());
+
+    // By room
+    Map<String, List<Booking>> byRoom = bookings.stream()
+        .collect(Collectors.groupingBy(b -> b.getRoom().getRoomId()));
+
+    List<BookingStatsResponse.RoomStat> roomStats = byRoom.entrySet().stream()
+        .map(e -> {
+          var room = e.getValue().get(0).getRoom();
+          var roomType = room.getRoomType();
+          return new BookingStatsResponse.RoomStat(
+              room.getRoomId(),
+              room.getName(),
+              room.getFloor(),
+              roomType.getTypeId(),
+              roomType.getName(),
+              e.getValue().size());
+        })
+        .sorted(Comparator.comparingInt(BookingStatsResponse.RoomStat::getCount).reversed()
+            .thenComparing(BookingStatsResponse.RoomStat::getRoomName))
+        .collect(Collectors.toList());
  
     // By year+month
     Map<String, List<Booking>> byMonth = bookings.stream()
@@ -111,7 +131,7 @@ public class BookingServiceImpl implements BookingService {
             .thenComparingInt(BookingStatsResponse.MonthStat::getMonth))
         .collect(Collectors.toList());
  
-    return new BookingStatsResponse(total, roomTypeStats, monthStats);
+    return new BookingStatsResponse(total, roomTypeStats, roomStats, monthStats);
   }
 
   @Override
@@ -247,6 +267,7 @@ public class BookingServiceImpl implements BookingService {
         roomDto,
         booking.getDate(),
         booking.getStatus().name().toLowerCase(),
+        booking.getCustomer().getEmail(),
         slotResponses);
   }
 
