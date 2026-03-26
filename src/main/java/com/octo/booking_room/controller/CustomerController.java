@@ -3,12 +3,14 @@ package com.octo.booking_room.controller;
 import com.octo.booking_room.entity.customer.Customer;
 import com.octo.booking_room.service.customer.CustomerService;
 import com.octo.booking_room.utils.WebResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/customers")
+@SecurityRequirement(name = "bearerAuth")
 public class CustomerController {
 
     private final CustomerService customerService;

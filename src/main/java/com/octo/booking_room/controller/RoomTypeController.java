@@ -4,6 +4,7 @@ import com.octo.booking_room.dto.room.CreateRoomTypeRequest;
 import com.octo.booking_room.dto.room.RoomTypeDto;
 import com.octo.booking_room.service.room.RoomTypeService;
 import com.octo.booking_room.utils.WebResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/room-types")
+@SecurityRequirement(name = "bearerAuth")
 public class RoomTypeController {
 
     private final RoomTypeService roomTypeService;
