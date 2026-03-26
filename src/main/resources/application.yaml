@@ -7,9 +7,9 @@ spring:
     name: booking-room
 
   datasource:
-    url: jdbc:mysql://${MYSQLHOST}:${MYSQLPORT}/${MYSQLDATABASE}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
-    username: ${MYSQLUSER}
-    password: ${MYSQLPASSWORD}
+    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://${MYSQLHOST:turntable.proxy.rlwy.net}:${MYSQLPORT:33347}/${MYSQLDATABASE:railway}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC}
+    username: ${SPRING_DATASOURCE_USERNAME:${MYSQLUSER:root}}
+    password: ${SPRING_DATASOURCE_PASSWORD:${MYSQLPASSWORD:yXfqRkhSOUSsOhAsvgnjeBsLllaMbesd}}
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:

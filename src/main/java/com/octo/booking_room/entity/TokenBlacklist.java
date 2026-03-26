@@ -7,10 +7,6 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 
-/**
- * Stores JWTs that have been invalidated via logout.  The token string is the
- * primary key so that lookups are efficient.
- */
 @Entity
 @Table(name = "token_blacklist")
 @Getter
@@ -18,10 +14,10 @@ import lombok.Setter;
 public class TokenBlacklist {
 
     @Id
-    // MySQL utf8mb4 allows maximum 3072‑byte index; 1024 chars × 4 bytes = 4096 and fails.
-    // shrink to 768 chars (~3KB) which fits comfortably, or larger tokens can be stored
-    // as a LOB if needed.
-    @Column(name = "token", nullable = false, length = 768)
+    @Column(name = "id", nullable = false, length = 36)
+    private String id;
+
+    @Column(name = "token", nullable = false, columnDefinition = "TEXT")
     private String token;
 
     @Column(name = "expired_at")

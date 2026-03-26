@@ -15,6 +15,8 @@ public class BookingBasicResponse {
     private RoomDto room;
     private LocalDate date;
     private String status;
+    @JsonProperty("customer_email")
+    private String customerEmail;
     private java.util.List<BookingSlotBasicResponse> slots;
 
 }

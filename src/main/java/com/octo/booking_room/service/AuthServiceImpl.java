@@ -79,11 +79,12 @@ public class AuthServiceImpl implements AuthService {
         if (!jwtUtil.validateToken(token)) {
             throw new RuntimeException("Invalid token: cannot logout with invalid token.");
         }
-        if (tokenBlacklistRepository.existsById(token)) {
+        if (tokenBlacklistRepository.existsByToken(token)) {
             // Already logged out with this token; idempotent behavior.
             return false;
         }
         TokenBlacklist blacklistEntry = new TokenBlacklist();
+        blacklistEntry.setId(IdGenerator.generateId());
         blacklistEntry.setToken(token);
         blacklistEntry.setExpiredAt(jwtUtil.getExpirationFromToken(token).toString());
         tokenBlacklistRepository.save(blacklistEntry);

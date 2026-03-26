@@ -26,6 +26,10 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         Customer customer = customerRepository.findByEmail(email)
             .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
 
-        return new User(customer.getEmail(), customer.getPassword(), Collections.emptyList());
+        String role = customer.getIsAdmin() ? "ROLE_ADMIN" : "ROLE_CUSTOMER";
+        return User.withUsername(customer.getEmail())
+                    .password(customer.getPassword())
+                    .authorities(role)
+                    .build();
     }
 }
