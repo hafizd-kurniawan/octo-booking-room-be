@@ -2,6 +2,7 @@ package com.octo.booking_room.service.booking;
 
 import com.octo.booking_room.dto.booking.BookingBasicResponse;
 import com.octo.booking_room.dto.booking.BookingDetailResponse;
+import com.octo.booking_room.dto.booking.BookingMonthlyTableResponse;
 import com.octo.booking_room.dto.booking.BookingStatsResponse;
 import com.octo.booking_room.dto.booking.BookingFilter;
 import com.octo.booking_room.dto.booking.BookingSlotBasicResponse;
@@ -135,6 +136,62 @@ public class BookingServiceImpl implements BookingService {
   }
 
   @Override
+  public BookingMonthlyTableResponse getMonthlyBookingTable(String requesterEmail, BookingFilter filter) {
+    requireAdmin(requesterEmail);
+
+    Map<String, List<Booking>> byMonth = bookingRepository.findAll().stream()
+        .filter(b -> matchesFilter(b, filter))
+        .collect(Collectors.groupingBy(b -> b.getDate().getYear() + "-" + String.format("%02d", b.getDate().getMonthValue())));
+
+    List<BookingMonthlyTableResponse.MonthlyBookingSummary> monthSummaries = byMonth.values().stream()
+        .map(bookings -> {
+          LocalDate sample = bookings.get(0).getDate();
+          String label = sample.getMonth().getDisplayName(TextStyle.SHORT, Locale.ENGLISH) + " " + sample.getYear();
+
+          List<BookingMonthlyTableResponse.RoomBookingCount> byRoom = bookings.stream()
+              .collect(Collectors.groupingBy(b -> b.getRoom().getRoomId()))
+              .entrySet().stream()
+              .map(entry -> {
+                Booking sampleBooking = entry.getValue().get(0);
+                return new BookingMonthlyTableResponse.RoomBookingCount(
+                    sampleBooking.getRoom().getRoomId(),
+                    sampleBooking.getRoom().getName(),
+                    entry.getValue().size());
+              })
+              .sorted(Comparator.comparingInt(BookingMonthlyTableResponse.RoomBookingCount::getCount).reversed()
+                  .thenComparing(BookingMonthlyTableResponse.RoomBookingCount::getRoomName))
+              .collect(Collectors.toList());
+
+          List<BookingMonthlyTableResponse.RoomTypeBookingCount> byRoomType = bookings.stream()
+              .collect(Collectors.groupingBy(b -> b.getRoom().getRoomType().getTypeId()))
+              .entrySet().stream()
+              .map(entry -> {
+                Booking sampleBooking = entry.getValue().get(0);
+                return new BookingMonthlyTableResponse.RoomTypeBookingCount(
+                    sampleBooking.getRoom().getRoomType().getTypeId(),
+                    sampleBooking.getRoom().getRoomType().getName(),
+                    entry.getValue().size());
+              })
+              .sorted(Comparator.comparingInt(BookingMonthlyTableResponse.RoomTypeBookingCount::getCount).reversed()
+                  .thenComparing(BookingMonthlyTableResponse.RoomTypeBookingCount::getTypeName))
+              .collect(Collectors.toList());
+
+          return new BookingMonthlyTableResponse.MonthlyBookingSummary(
+              sample.getYear(),
+              sample.getMonthValue(),
+              label,
+              bookings.size(),
+              byRoom,
+              byRoomType);
+        })
+        .sorted(Comparator.comparingInt(BookingMonthlyTableResponse.MonthlyBookingSummary::getYear)
+            .thenComparingInt(BookingMonthlyTableResponse.MonthlyBookingSummary::getMonth))
+        .collect(Collectors.toList());
+
+    return new BookingMonthlyTableResponse(monthSummaries);
+  }
+
+  @Override
   public BookingDetailResponse getBookingDetail(String email, String bookingId) {
     Booking booking = findAuthorizedBooking(email, bookingId);
 
@@ -247,6 +304,10 @@ public class BookingServiceImpl implements BookingService {
  
     if (filter.getMonth() != null) {
       if (booking.getDate().getMonthValue() != filter.getMonth()) return false;
+    }
+
+    if (filter.getStatus() != null && booking.getStatus() != filter.getStatus()) {
+      return false;
     }
  
     return true;
