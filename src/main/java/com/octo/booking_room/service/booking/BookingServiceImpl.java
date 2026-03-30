@@ -356,6 +356,10 @@ public class BookingServiceImpl implements BookingService {
   }
 
   private void validateSlots(LocalDate bookingDate, List<CreateBookingRequest.SlotRequest> slots) {
+    if (bookingDate == null) {
+      throw new BadRequestException("date is required");
+    }
+
     if (slots == null || slots.isEmpty()) {
       throw new BadRequestException("At least one slot is required");
     }
@@ -390,7 +394,7 @@ public class BookingServiceImpl implements BookingService {
     List<Booking> existingBookings = bookingRepository.findByRoom_RoomIdAndDate(roomId, date);
 
     List<BookingSlot> existingSlots = existingBookings.stream()
-        .filter(b -> b.getStatus() != BookingStatus.CANCELLED)
+        .filter(b -> b.getStatus() != null && b.getStatus().isActive())
         .flatMap(b -> b.getBookingSlots().stream())
         .collect(Collectors.toList());
 

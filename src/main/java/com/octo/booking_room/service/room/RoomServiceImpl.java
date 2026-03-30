@@ -50,7 +50,7 @@ public class RoomServiceImpl implements RoomService {
         List<Booking> bookings = bookingRepository.findByRoom_RoomIdAndDate(roomId, date);
 
         List<BookedSlotDto> slots = bookings.stream()
-            .filter(booking -> booking.getStatus() == BookingStatus.BOOKED)
+            .filter(booking -> booking.getStatus() != null && booking.getStatus().isActive())
             .flatMap(booking -> booking.getBookingSlots().stream()
                 .map(slot -> new BookedSlotDto(
                     booking.getBookingId(),

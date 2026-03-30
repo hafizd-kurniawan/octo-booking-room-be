@@ -60,6 +60,19 @@ class BookingServiceImplCreateBookingTest {
   }
 
   @Test
+  void shouldRejectMissingBookingDateBeforeComparingSlotDates() {
+    CreateBookingRequest request = new CreateBookingRequest();
+    request.setRoomId("room-1");
+    request.setSlots(List.of(slot(
+        LocalDateTime.of(2026, 3, 30, 9, 0),
+        LocalDateTime.of(2026, 3, 30, 10, 0))));
+
+    assertThatThrownBy(() -> bookingService.createBooking("user@example.com", request))
+        .isInstanceOf(BadRequestException.class)
+        .hasMessage("date is required");
+  }
+
+  @Test
   void shouldLockRoomBeforeSavingBooking() {
     Room room = room();
     when(customerRepository.findByEmail("user@example.com")).thenReturn(Optional.of(customer()));
