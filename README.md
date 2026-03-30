@@ -9,6 +9,16 @@ docker compose up --build
 docker compose logs -f backend
 docker exec -it booking_mysql mysql -u root -p
 ```
+
+## Required Environment Variables
+```bash
+SPRING_DATASOURCE_URL=jdbc:mysql://localhost:3306/booking_room?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+SPRING_DATASOURCE_USERNAME=your_db_user
+SPRING_DATASOURCE_PASSWORD=your_db_password
+JWT_SECRET=minimum_32_byte_random_secret_value_here
+```
+
+Project ini tidak lagi mengirim default database credential, JWT secret, atau akun demo bawaan di migration. Admin sebaiknya diprovision secara aman per environment.
 ## Semantic Commit Messages
 ```txt
 feat: (new feature for the user, not a new feature for build script)
