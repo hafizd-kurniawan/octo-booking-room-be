@@ -32,6 +32,14 @@ build/
 ### VS Code ###
 .vscode/
 
+*.yml
+!**/src/resources/*.yaml
+.m2repo
+
+# local config files
+/docker-compose.yml
+/src/main/resources/application.yaml
+
 .env
 .env.*
 !.env.example
