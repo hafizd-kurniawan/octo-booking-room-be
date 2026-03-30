@@ -33,5 +33,9 @@ build/
 .vscode/
 
 *.yml
-/src/resources/*.yaml
+!**/src/resources/*.yaml
 .m2repo
+
+# local config files
+/docker-compose.yml
+/src/main/resources/application.yaml
