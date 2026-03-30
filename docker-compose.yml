@@ -35,9 +35,9 @@ services:
     ports:
       - "8080:8080"
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://turntable.proxy.rlwy.net:33347/railway?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      SPRING_DATASOURCE_URL: jdbc:mysql://gondola.proxy.rlwy.net:52250/railway?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
       SPRING_DATASOURCE_USERNAME: root
-      SPRING_DATASOURCE_PASSWORD: yXfqRkhSOUSsOhAsvgnjeBsLllaMbesd
+      SPRING_DATASOURCE_PASSWORD: htSlHYHHPNXzFAQOLnlvxhXbKkdRrjOx
 
 volumes:
   mysql_data:

@@ -7,8 +7,6 @@ import com.octo.booking_room.repository.customer.CustomerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
-
 @Service
 public class CustomerServiceImpl implements CustomerService {
 
@@ -20,19 +18,25 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public Optional<Customer> findByEmail(String email) {
-        return customerRepository.findByEmail(email);
+    public CustomerResponse findByEmail(String email) {
+        Customer customer = customerRepository.findByEmail(email)
+            .orElseThrow(() -> new ResourceNotFoundException("Customer with email " + email + " not found"));
+        return toCustomerResponse(customer);
     }
 
     @Override
     public CustomerResponse findById(String customerId) {
-        Customer cust = customerRepository.findById(customerId)
-                .orElseThrow(() -> new ResourceNotFoundException("Customer with ID " + customerId + " not found"));
+        Customer customer = customerRepository.findById(customerId)
+            .orElseThrow(() -> new ResourceNotFoundException("Customer with ID " + customerId + " not found"));
+        return toCustomerResponse(customer);
+    }
+
+    private CustomerResponse toCustomerResponse(Customer customer) {
         return new CustomerResponse(
-                cust.getCustomerId(),
-                cust.getName(),
-                cust.getEmail(),
-                cust.getPhone()
+            customer.getCustomerId(),
+            customer.getName(),
+            customer.getEmail(),
+            customer.getPhone()
         );
     }
 }
