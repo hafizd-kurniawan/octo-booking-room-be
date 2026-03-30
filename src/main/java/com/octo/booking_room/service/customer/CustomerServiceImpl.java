@@ -1,5 +1,6 @@
 package com.octo.booking_room.service.customer;
 
+import com.octo.booking_room.dto.customer.CustomerResponse;
 import com.octo.booking_room.entity.customer.Customer;
 import com.octo.booking_room.exception.ResourceNotFoundException;
 import com.octo.booking_room.repository.customer.CustomerRepository;
@@ -24,8 +25,14 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public Customer findById(String customerId) {
-        return customerRepository.findById(customerId)
+    public CustomerResponse findById(String customerId) {
+        Customer cust = customerRepository.findById(customerId)
                 .orElseThrow(() -> new ResourceNotFoundException("Customer with ID " + customerId + " not found"));
+        return new CustomerResponse(
+                cust.getCustomerId(),
+                cust.getName(),
+                cust.getEmail(),
+                cust.getPhone()
+        );
     }
 }
