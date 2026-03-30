@@ -1,5 +1,5 @@
 server:
-  port: ${PORT:8080}
+  port: ${PORT}
   forward-headers-strategy: framework
 
 spring:
@@ -7,9 +7,9 @@ spring:
     name: booking-room
 
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://${MYSQLHOST:turntable.proxy.rlwy.net}:${MYSQLPORT:33347}/${MYSQLDATABASE:railway}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC}
-    username: ${SPRING_DATASOURCE_USERNAME:${MYSQLUSER:root}}
-    password: ${SPRING_DATASOURCE_PASSWORD:${MYSQLPASSWORD:yXfqRkhSOUSsOhAsvgnjeBsLllaMbesd}}
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
@@ -34,4 +34,4 @@ management:
         enabled: true
 
 jwt:
-  secret: ${JWT_SECRET:J3CW7Xf3vQ9jgJTjOQ4SWMs47Ik2UInPva9PFBNL5dU=}
+  secret: ${JWT_SECRET}

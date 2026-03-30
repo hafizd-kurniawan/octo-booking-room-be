@@ -1,6 +1,7 @@
 package com.octo.booking_room.controller;
 
-import com.octo.booking_room.entity.customer.Customer;
+import com.octo.booking_room.dto.customer.CustomerResponse;
+// import com.octo.booking_room.entity.customer.Customer;
 import com.octo.booking_room.service.customer.CustomerService;
 import com.octo.booking_room.utils.WebResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -21,8 +22,8 @@ public class CustomerController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<WebResponse<Customer>> getCustomer(@PathVariable("id") String id) {
-        Customer customer = customerService.findById(id);
+    public ResponseEntity<WebResponse<CustomerResponse>> getCustomer(@PathVariable("id") String id) {
+        CustomerResponse customer = customerService.findById(id);
         return ResponseEntity.ok(new WebResponse<>("success", "Customer retrieved", customer));
     }
 }
