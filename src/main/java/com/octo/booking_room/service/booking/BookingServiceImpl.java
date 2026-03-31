@@ -26,6 +26,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.format.TextStyle;
@@ -224,8 +225,9 @@ public class BookingServiceImpl implements BookingService {
   }
 
   @Override
+  @Transactional
   public CreateBookingResponse createBooking(String requesterEmail, CreateBookingRequest request) {
-    validateSlots(request.getSlots());
+    validateSlots(request.getDate(), request.getSlots());
 
     Customer requester = findCustomerByEmail(requesterEmail);
     boolean isAdmin = Boolean.TRUE.equals(requester.getIsAdmin());
@@ -240,10 +242,10 @@ public class BookingServiceImpl implements BookingService {
       bookingOwner = requester;
     }
 
-    validateCrossBooking(request.getRoomId(), request.getDate(), request.getSlots());
-
-    Room room = roomRepository.findById(request.getRoomId())
+    Room room = roomRepository.findByIdForUpdate(request.getRoomId())
         .orElseThrow(() -> new ResourceNotFoundException("Room " + request.getRoomId() + " not found"));
+
+    validateCrossBooking(room.getRoomId(), request.getDate(), request.getSlots());
 
     String bookingId = IdGenerator.generateId("book-");
     Booking booking = new Booking();
@@ -353,7 +355,11 @@ public class BookingServiceImpl implements BookingService {
     return booking;
   }
 
-  private void validateSlots(List<CreateBookingRequest.SlotRequest> slots) {
+  private void validateSlots(LocalDate bookingDate, List<CreateBookingRequest.SlotRequest> slots) {
+    if (bookingDate == null) {
+      throw new BadRequestException("date is required");
+    }
+
     if (slots == null || slots.isEmpty()) {
       throw new BadRequestException("At least one slot is required");
     }
@@ -364,6 +370,12 @@ public class BookingServiceImpl implements BookingService {
     for (CreateBookingRequest.SlotRequest slot : sortedSlots) {
       if (!slot.getStartHour().isBefore(slot.getEndHour())) {
         throw new BadRequestException("start_hour must be before end_hour");
+      }
+
+      LocalDate startDate = slot.getStartHour().toLocalDate();
+      LocalDate endDate = slot.getEndHour().toLocalDate();
+      if (!bookingDate.equals(startDate) || !bookingDate.equals(endDate)) {
+        throw new BadRequestException("All slot times must stay within the booking date");
       }
     }
 
@@ -382,7 +394,7 @@ public class BookingServiceImpl implements BookingService {
     List<Booking> existingBookings = bookingRepository.findByRoom_RoomIdAndDate(roomId, date);
 
     List<BookingSlot> existingSlots = existingBookings.stream()
-        .filter(b -> b.getStatus() != BookingStatus.CANCELLED)
+        .filter(b -> b.getStatus() != null && b.getStatus().isActive())
         .flatMap(b -> b.getBookingSlots().stream())
         .collect(Collectors.toList());
 

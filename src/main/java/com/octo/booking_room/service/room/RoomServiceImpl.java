@@ -6,6 +6,7 @@ import com.octo.booking_room.dto.room.CreateRoomRequest;
 import com.octo.booking_room.dto.room.RoomResponse;
 import com.octo.booking_room.dto.room.RoomTypeDto;
 import com.octo.booking_room.entity.booking.Booking;
+import com.octo.booking_room.entity.booking.BookingStatus;
 import com.octo.booking_room.entity.room.Room;
 import com.octo.booking_room.entity.room.RoomType;
 import com.octo.booking_room.exception.BadRequestException;
@@ -49,6 +50,7 @@ public class RoomServiceImpl implements RoomService {
         List<Booking> bookings = bookingRepository.findByRoom_RoomIdAndDate(roomId, date);
 
         List<BookedSlotDto> slots = bookings.stream()
+            .filter(booking -> booking.getStatus() != null && booking.getStatus().isActive())
             .flatMap(booking -> booking.getBookingSlots().stream()
                 .map(slot -> new BookedSlotDto(
                     booking.getBookingId(),
